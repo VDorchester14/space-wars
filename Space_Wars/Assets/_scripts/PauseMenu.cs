@@ -5,15 +5,17 @@ using UnityEngine.SceneManagement;
 
 public class PauseMenu : MonoBehaviour {
 
+    private GameObject menu;
+    private bool paused = false;
 	// Use this for initialization
 	void Start () {
-		
-	}
+
+    }
 	
 	// Update is called once per frame
 	void Update () {
-		
-	}
+
+    }
 
     //Quit to Menu
     public void QuitToMenu()

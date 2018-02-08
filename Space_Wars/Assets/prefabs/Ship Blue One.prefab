@@ -40,7 +40,7 @@ GameObject:
   - component: {fileID: 114536962894339752}
   m_Layer: 0
   m_Name: Ship Blue One
-  m_TagString: Ship
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -160,6 +160,7 @@ MonoBehaviour:
   bulletPrefab: {fileID: 50821334935188210, guid: 9d2bab4dbde26f547ac8585ea6d2178b,
     type: 2}
   bullet_speed: 100
+  isTurn: 0
 --- !u!212 &212329152159232978
 SpriteRenderer:
   m_ObjectHideFlags: 1
