@@ -12,7 +12,16 @@ public class Driver : MonoBehaviour {
 	void Start () {
         //get the ships
         shipsContainer = GameObject.Find("Ships");//container
-        ships = shipsContainer.GetComponentsInChildren<GameObject>();//children
+        //ships = shipsContainer.GetComponentsInChildren(GameObject);//children
+        ships = new GameObject[shipsContainer.transform.childCount];
+
+        int i = 0;
+        foreach (Transform child in shipsContainer.transform)
+        {
+            //child is your child transform
+            ships[i] = child.gameObject;
+            i=i+1;
+        }
 
         //find the player
         foreach (GameObject ship in ships)
