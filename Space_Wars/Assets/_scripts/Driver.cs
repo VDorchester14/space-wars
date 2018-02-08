@@ -16,6 +16,7 @@ public class Driver : MonoBehaviour {
         //ships = shipsContainer.GetComponentsInChildren(GameObject);//children
         ships = new GameObject[shipsContainer.transform.childCount];
 
+        //get all the ships
         int i = 0;
         foreach (Transform child in shipsContainer.transform)
         {
@@ -51,7 +52,7 @@ public class Driver : MonoBehaviour {
         if (index == ships.Length)//are we at the end of the array
         {
             Debug.Log("Back to start of array");
-            index = 1;//reset
+            index = 0;//reset
         }
 
         //set active ship

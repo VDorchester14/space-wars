@@ -5,21 +5,28 @@ using UnityEngine.UI; // Required when Using UI elements.
 
 public class player_controller : MonoBehaviour {
 
+    //prefabs
     public Rigidbody2D bulletPrefab;
     //public Transform bulletSpawn;
     public float bullet_speed = 100;
     private Slider power;
     private Button fire;
     private Slider angle;
+    private bool liveBullet = false;
     //private Panel PauseMenu;
     private GameObject menu;
     private bool paused = false;
     //turn handling
     private GameObject Driver;
     public bool isTurn = false;
+    //player info
+    private float health = 100;
 
     // Use this for initialization
     void Start () {
+
+        //there is not currently a live bullet
+        liveBullet = false;
 
         //game objects that hold the UI components
         GameObject slide;//set up slide object
@@ -66,14 +73,14 @@ public class player_controller : MonoBehaviour {
         transform.rotation = Quaternion.Euler(new Vector3(0f, 0f, angle.value*360));
 
         //set power and angle to not be changeable when it's not their turn
-        if (!isTurn)
+        if (!isTurn || liveBullet)
         {
             power.interactable = false;
             angle.interactable = false;
             fire.interactable = false;
         }
         //set power and angle to be changeable when it's their turn
-        if (isTurn)
+        if (isTurn && !liveBullet)
         {
             power.interactable = true;
             angle.interactable = true;
@@ -98,8 +105,9 @@ public class player_controller : MonoBehaviour {
     //fire projectile
     void Fire()
     {
-        if (isTurn)
+        if (isTurn && !liveBullet)
         {
+            liveBullet = true;//so you can't just shoot tons of bullets at once
             //position vector
             Transform missile_spawn = gameObject.transform.GetChild(0);//get missileSpawn
             Vector2 pos = new Vector2(missile_spawn.transform.position.x, missile_spawn.transform.position.y);
@@ -119,6 +127,7 @@ public class player_controller : MonoBehaviour {
 
             //give it velocity
             bulletInstance.AddForce(transform.up * bullet_speed * power.value, ForceMode2D.Impulse);
+            Debug.Log(power.value);
             bulletInstance.transform.parent = transform;
             //Debug.Log(bulletInstance.velocity);
         }
@@ -135,6 +144,7 @@ public class player_controller : MonoBehaviour {
     {
         //Debug.Log("The missile that was shot has died");
         turnPhase();//change turn here too
+        liveBullet = false;
         Driver.SendMessage("changeTurn");//tell driver to change turn
     }
 

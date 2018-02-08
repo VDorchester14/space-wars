@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 212880972085028456}
   - component: {fileID: 60930433722076826}
   - component: {fileID: 50806542595848442}
+  - component: {fileID: 114320301143180180}
   m_Layer: 0
   m_Name: Ship Orange One
   m_TagString: Ship
@@ -163,6 +164,19 @@ PolygonCollider2D:
       - {x: -0.04, y: -1.135}
       - {x: 0, y: -0.935}
       - {x: -0.01, y: -0.825}
+--- !u!114 &114320301143180180
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1161011523278392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16eb9f82fba6c274fa549b8c80ccafae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: 50821334935188210, guid: 9d2bab4dbde26f547ac8585ea6d2178b,
+    type: 2}
 --- !u!212 &212880972085028456
 SpriteRenderer:
   m_ObjectHideFlags: 1
