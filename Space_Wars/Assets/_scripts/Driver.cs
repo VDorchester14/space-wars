@@ -8,6 +8,7 @@ public class Driver : MonoBehaviour {
     private GameObject[] ships;//array containing all the ships
     private GameObject player;
     private GameObject activeShip;//ship who's turn it is
+    private int index;
 	// Use this for initialization
 	void Start () {
         //get the ships
@@ -24,12 +25,12 @@ public class Driver : MonoBehaviour {
         }
 
         //find the player
-        foreach (GameObject ship in ships)
+        for (index = 0; index < ships.Length; index ++)
         {
             //is this one the player?
-            if (ship.tag == "Player")
+            if (ships[index].tag == "Player")
             {
-                player = ship;//set player
+                player = ships[index];//set player
                 activeShip = player;//set player to go first
                 break;
             }
@@ -40,7 +41,27 @@ public class Driver : MonoBehaviour {
         //start player turn
         player.SendMessage("turnPhase");//tell this object to change it's turn
     }
-	
+
+    //change whose turn it is
+    public void changeTurn()
+    {
+        //move through ships array to get active ship
+        index = index + 1;
+        
+        if (index == ships.Length)//are we at the end of the array
+        {
+            Debug.Log("Back to start of array");
+            index = 1;//reset
+        }
+
+        //set active ship
+        activeShip = ships[index];
+        Debug.Log("Currently " + activeShip.name + " turn");
+
+        //send it a message to do its turn
+        activeShip.SendMessage("turnPhase");
+    }
+
 	// Update is called once per frame
 	void Update () {
 		

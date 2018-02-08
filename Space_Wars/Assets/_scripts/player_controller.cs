@@ -15,6 +15,7 @@ public class player_controller : MonoBehaviour {
     private GameObject menu;
     private bool paused = false;
     //turn handling
+    private GameObject Driver;
     public bool isTurn = false;
 
     // Use this for initialization
@@ -24,6 +25,9 @@ public class player_controller : MonoBehaviour {
         GameObject slide;//set up slide object
         GameObject fire_object;//the object that contains the button element
         GameObject angle_object;
+
+        //driving game objects
+        Driver = GameObject.Find("Driver");//get the driver
 
         //assign these objects
         slide = GameObject.Find("Power_Slider");//find the slider
@@ -69,7 +73,7 @@ public class player_controller : MonoBehaviour {
             fire.interactable = false;
         }
         //set power and angle to be changeable when it's their turn
-        if (!isTurn)
+        if (isTurn)
         {
             power.interactable = true;
             angle.interactable = true;
@@ -80,8 +84,15 @@ public class player_controller : MonoBehaviour {
     //change turn phase
     public void turnPhase()
     {
-        Debug.Log("Changing turns");
-        isTurn = !isTurn;
+        //Debug.Log("Changing turns");
+        if (isTurn) {
+            isTurn = false;
+            Debug.Log("Not player turn anymore");
+        }
+        else if (!isTurn) {
+            isTurn = true;
+            Debug.Log("It is now the player's turn");
+        }
     }
 
     //fire projectile
@@ -108,13 +119,23 @@ public class player_controller : MonoBehaviour {
 
             //give it velocity
             bulletInstance.AddForce(transform.up * bullet_speed * power.value, ForceMode2D.Impulse);
+            bulletInstance.transform.parent = transform;
             //Debug.Log(bulletInstance.velocity);
         }
     }
 
+    //gets the angle between two points
     float AngleBetweenTwoPoints(Vector2 a, Vector2 b)
     {
         return Mathf.Atan2(a.y - b.y, a.x - b.x) * Mathf.Rad2Deg + 90;
+    }
+
+    //registers the death of a child missile
+    public void missile_death_handler()
+    {
+        //Debug.Log("The missile that was shot has died");
+        turnPhase();//change turn here too
+        Driver.SendMessage("changeTurn");//tell driver to change turn
     }
 
 }

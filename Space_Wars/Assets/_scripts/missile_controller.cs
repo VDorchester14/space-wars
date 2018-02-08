@@ -71,5 +71,15 @@ public class missile_controller : MonoBehaviour {
             own_rigidBody.constraints = RigidbodyConstraints2D.FreezeAll;
         }
 
+        //Hit the player
+        if (other.gameObject.CompareTag("Player"))
+        {
+            //Debug.Log("HIT A PLANET AHHH");
+            a.SetTrigger("explode");
+            own_rigidBody.constraints = RigidbodyConstraints2D.FreezeAll;
+        }
+
+        //now tell the parent it is dying
+        transform.parent.SendMessage("missile_death_handler");
     }
 }

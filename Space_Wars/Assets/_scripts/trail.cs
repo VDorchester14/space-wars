@@ -17,7 +17,7 @@ public class trail : MonoBehaviour {
 	}
 
     public void die() {
-        Debug.Log("DEATH TO THE TRAIL");
+        //Debug.Log("DEATH TO THE TRAIL");
         StartCoroutine(delete_trail ());
     }
 
