@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 public class Gravity : MonoBehaviour
 {
-    public float range = 10f;
+    public float range = 1000f;
 
     Rigidbody2D ownRb;
-    
+
     void Start()
     {
         ownRb = GetComponent<Rigidbody2D>();
