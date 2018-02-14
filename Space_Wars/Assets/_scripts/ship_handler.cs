@@ -21,7 +21,7 @@ public class ship_handler : MonoBehaviour {
     private GameObject[] ships;//array containing all the ships except this one
     private GameObject planetsContainer;//game object that holds the planets
     private GameObject[] planets;//to store the planets -- mostly for trajectory finding
-    
+
     // Use this for initialization
     void Start () {
         //init driver
@@ -29,16 +29,6 @@ public class ship_handler : MonoBehaviour {
 
         //init trajectory options
         trajectoryOptions = new float[100, 3];//100 trajectories with angle, power, fitness (accuracy)
-
-        //init previous trajectory
-        previousTrajectory = new float[2];//initilaize
-        GameObject enemy = chooseEnemy();//get the enemy
-        Vector3 diff = enemy.transform.position - transform.position;//difference vector
-        diff.Normalize();
-        angle = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;//get the angle
-        power = 0.5f;//set power
-        previousTrajectory[0] = angle;//set initial angle
-        previousTrajectory[1] = power;//set initial power
 
         /*
          * get all the ships to choose who to aim at
@@ -59,19 +49,32 @@ public class ship_handler : MonoBehaviour {
 
         //get all the planets
         planetsContainer = GameObject.Find("Planets");
-        planets = new GameObject[planetsContainer.transform.childCount - 1];//size the array
+        planets = new GameObject[planetsContainer.transform.childCount];//size the array
+        //Debug.Log("There are "+(planetsContainer.transform.childCount)+" planets");
         i = 0;
-        foreach (Transform child in shipsContainer.transform)
+        foreach (Transform child in planetsContainer.transform)
         {
+            //Debug.Log(i+"th planet");
             planets[i] = child.gameObject;
-            i++;
+            //Debug.Log("Planet: "+child);
+            i = i + 1;
         }
+
+        //init previous trajectory
+        previousTrajectory = new float[2];//initilaize
+        GameObject enemy = chooseEnemy();//get the enemy
+        Vector3 diff = enemy.transform.position - transform.position;//difference vector
+        diff.Normalize();
+        angle = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;//get the angle
+        power = 0.5f;//set power
+        previousTrajectory[0] = angle;//set initial angle
+        previousTrajectory[1] = power;//set initial power
 
         //is there a live bullet
         liveBullet = false;//no there is not a live bullet right now
 
     }
-	
+
 	// Update is called once per frame
 	void Update () {
 
@@ -103,6 +106,7 @@ public class ship_handler : MonoBehaviour {
         {
             Debug.Log("Ending enemy turn");
             isTurn = false;
+            liveBullet = false;
         }
         else if (!isTurn)
         {
@@ -118,20 +122,23 @@ public class ship_handler : MonoBehaviour {
     //power 0.3, both values are stored in the previousTrajectory[0] and [1] respectively
     private void aim()
     {
-        /*choose enemy
-        GameObject enemy = chooseEnemy();
-
-        //rotate
-        Vector3 diff = enemy.transform.position - transform.position;
-        diff.Normalize();
-        angle = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0f, 0f, angle - 90);
-
-        //set power
-        power = 0.3f;
-        */
-
-        
+        generateTrajectories();//generate some options
+        evaluateAccuracyOfTrajectories();//evaluate them all
+        float best = 1000;
+        int ind = 0;
+        for(int i=0;i<100;i++){//find the best one
+            if (trajectoryOptions[i,2]<best){
+                best = trajectoryOptions[i,2];
+                power = trajectoryOptions[i,1];
+                angle = trajectoryOptions[i,0];
+                Debug.Log("New Best: "+best);
+                ind = i;
+            }
+        }
+        Debug.Log("Went with shot: "+ind);
+        //angle = trajectoryOptions[0,0];//get angle
+        //power = trajectoryOptions[0,1];//get power
+        transform.rotation = Quaternion.Euler(0f, 0f, angle - 90);//rotate to match
     }
 
     //Function to generate the possible trajectorie
@@ -144,17 +151,89 @@ public class ship_handler : MonoBehaviour {
             //TODO: make the range around the previous trajetory proportional to how close that shot is
             //to making contact
             trajectoryOptions[t, 0] = previousTrajectory[0] + (Random.value*2*30)-30;//previous angle +- 30~
-            trajectoryOptions[t, 1] = previousTrajectory[1] + (Random.value*2*30)-30;//previous power +- 30~
-            trajectoryOptions[t, 2] = 0;//fitness
+            trajectoryOptions[t, 1] = previousTrajectory[1] + (Random.value*2*0.3f)-0.3f;//previous power +- 30~
+            if(trajectoryOptions[t,1]<0){//dont want negative power
+                trajectoryOptions[t,1]=0;
+            }
+            trajectoryOptions[t, 2] = 1000;//fitness
         }
     }
 
-    //This function will sort each possible trajectory based on 
+    //This function will sort each possible trajectory based on
     //some criteria i have yet to decide. Probably whichever one gets closest
     //to the enemy ship without actually hitting it
     private void evaluateAccuracyOfTrajectories()
     {
+        float dt = Time.fixedDeltaTime;//Time
+        Vector2 velocity = new Vector2(0, 0);//velocity
+        Vector2 position = new Vector2(0, 0);//position of particle
+        Vector2 force = new Vector2(0, 0);//force vector
+        Vector2 offset = new Vector2(0,0);//for calculating the forces
+        Vector2 planetPos = new Vector2(0,0);//for the planet position to be held in a 2d vector
+        float startingRot = 0;//starting rotation
+        float shortestDistance = 0;//distance between trajectory and enemy
+        GameObject enemy = chooseEnemy();//get the enemy to use in distance calcs
+        float radius = 0;//radius of planet
+        bool hitPlanet = false;//did it hit a planet
+        float distance = 0;//to be used in shortest distance calculations
 
+        //calculate fitnesses
+        for(int i=0;i<100;i++)//iterate through every object
+        {
+            startingRot = transform.rotation.z * Mathf.Deg2Rad;//get the z
+            position.x = transform.position.x;//set initial position
+            position.y = transform.position.y;//set initial position
+            velocity.x = bullet_speed * trajectoryOptions[i, 1] * Mathf.Sin(startingRot);//starting x velocity
+            velocity.y = bullet_speed * trajectoryOptions[i, 1] * Mathf.Cos(startingRot);//starting y velocity
+            shortestDistance = 1000;//shortest distance for this trajectory
+
+            for(int t=0;t<500;t++)//iterate through 100 time steps
+            {
+                //update force
+                for(int b=0; b<planets.Length;b++){//force is sum of planetary gravitational forces
+                     offset.x = position.x - planets[b].transform.position.x;//missile position - planet positions
+                     offset.y = position.y - planets[b].transform.position.y;//missile position - planet positions
+                     force = (offset / offset.sqrMagnitude * planets[b].GetComponent<Rigidbody2D>().mass);
+                }
+                //update position
+                position.x = position.x + velocity.x * dt;
+                position.y = position.y + velocity.y * dt;
+                //update velocity
+                velocity.x = velocity.x + (force.x) * dt;
+                velocity.y = velocity.y + (force.y) * dt;
+
+                //calculate if it has collided with a planet.
+                foreach(GameObject planet in planets)//check each planet
+                {
+                    radius = planet.transform.localScale.x / 2;//get the radius of that planet
+                    planetPos = planet.transform.position;
+                    if(Vector2.Distance(planetPos, position)<radius)//if the trajectory goes within the radius of the planet
+                    {
+                        //Debug.Log("planet collision detected.");
+                        hitPlanet = true;
+                        //break;
+                    }
+                }
+                //If it hit a planet just stop calculating this trajectory
+                if(hitPlanet)
+                {
+                    trajectoryOptions[i,2]=1000;//set fitness to be really bad
+                    Debug.Log("Trajectory "+i+" hit a planet lol");
+                    break;
+                }
+
+                //if it didn't hit a planet, calculate distance from enemy
+                if(!hitPlanet)
+                {
+                    distance = Mathf.Abs(position.sqrMagnitude - enemy.transform.position.sqrMagnitude);//get distance from enemy
+                    if(distance<shortestDistance){
+                        shortestDistance = distance;//if its shorter then replace shortest
+                        trajectoryOptions[i,2]=shortestDistance;
+                    }
+                }
+            }//time steps loop
+            Debug.Log("Trajectory "+i+" got "+shortestDistance+" away");
+        }//each ship loop
     }
 
 

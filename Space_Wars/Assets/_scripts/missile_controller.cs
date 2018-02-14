@@ -22,13 +22,13 @@ public class missile_controller : MonoBehaviour {
         //setting animator
         a = gameObject.GetComponent<Animator>();
     }
-	
+
 	// Update is called once per frame
 	void Update () {
-        //this function rotates the missile 
+        //this function rotates the missile
         rotate();
 
-        if (a.GetCurrentAnimatorStateInfo(0).IsName("dead"))
+        if (a.GetCurrentAnimatorStateInfo(0).IsName("explosion"))
         {
             //remove child
             Transform child = gameObject.transform.GetChild(0);//get trail
@@ -80,6 +80,6 @@ public class missile_controller : MonoBehaviour {
         }
 
         //now tell the parent it is dying
-        transform.parent.SendMessage("missile_death_handler");
+        //transform.parent.SendMessage("missile_death_handler");
     }
 }

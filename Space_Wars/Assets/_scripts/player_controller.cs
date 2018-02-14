@@ -48,7 +48,7 @@ public class player_controller : MonoBehaviour {
         fire = fire_object.GetComponent<Button>();
         fire.onClick.AddListener(Fire);//set it to fire when the button is clicked.
     }
-	
+
 	// Update is called once per frame
 	public void Update () {
 
@@ -94,6 +94,7 @@ public class player_controller : MonoBehaviour {
         //Debug.Log("Changing turns");
         if (isTurn) {
             isTurn = false;
+            liveBullet = false;
             Debug.Log("Not player turn anymore");
         }
         else if (!isTurn) {

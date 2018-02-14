@@ -48,7 +48,7 @@ public class Driver : MonoBehaviour {
     {
         //move through ships array to get active ship
         index = index + 1;
-        
+
         if (index == ships.Length)//are we at the end of the array
         {
             Debug.Log("Back to start of array");
@@ -60,11 +60,14 @@ public class Driver : MonoBehaviour {
         Debug.Log("Currently " + activeShip.name + " turn");
 
         //send it a message to do its turn
-        activeShip.SendMessage("turnPhase");
+        //activeShip.SendMessage("turnPhase");
+        for (int i = 0; i< ships.Length; i++){
+            ships[i].SendMessage("turnPhase");
+        }
     }
 
 	// Update is called once per frame
 	void Update () {
-		
+
 	}
 }

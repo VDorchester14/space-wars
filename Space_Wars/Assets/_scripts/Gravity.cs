@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class Gravity : MonoBehaviour
 {
     public float range = 1000f;
-
+    //private float g = 6.67408 * Math.power(10, -11);//gravitational constant
     Rigidbody2D ownRb;
 
     void Start()
@@ -25,7 +25,11 @@ public class Gravity : MonoBehaviour
             {
                 rbs.Add(rb);
                 Vector3 offset = transform.position - c.transform.position;
+                //float grav = g*ownRb.mass*rb.mass;//This is the Gmm part
+                //grav = grav / (offset.sqrMagnitude);
+                //rb.AddForce(grav / offset.sqrMagnitude);
                 rb.AddForce(offset / offset.sqrMagnitude * ownRb.mass);
+                //rb.AddForce(grav);
             }
         }
     }

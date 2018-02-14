@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class trail : MonoBehaviour {
 
-    public float diffuse_time = 6;
+    public float diffuse_time = 3;
 
 	// Use this for initialization
 	void Start () {
-		
+
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
-		
+
 	}
 
     public void die() {
@@ -24,6 +24,7 @@ public class trail : MonoBehaviour {
     IEnumerator delete_trail()
     {
         yield return new WaitForSeconds(diffuse_time);
+        GameObject.Find("Driver").SendMessage("changeTurn");
         Destroy(gameObject);
     }
 
