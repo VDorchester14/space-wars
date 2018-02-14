@@ -46,9 +46,8 @@ public class player_controller : MonoBehaviour {
         power = slide.GetComponent<Slider>();//get it's slider component
         angle = angle_object.GetComponent<Slider>();
         fire = fire_object.GetComponent<Button>();
-        fire.onClick.AddListener(Fire);//set it to fire when the button is clicked.
+        fire.onClick.AddListener(Fire);//
     }
-
 	// Update is called once per frame
 	public void Update () {
 
@@ -95,11 +94,11 @@ public class player_controller : MonoBehaviour {
         if (isTurn) {
             isTurn = false;
             liveBullet = false;
-            Debug.Log("Not player turn anymore");
+            //Debug.Log("Not player turn anymore");
         }
         else if (!isTurn) {
             isTurn = true;
-            Debug.Log("It is now the player's turn");
+            //Debug.Log("It is now the player's turn");
         }
     }
 
@@ -128,7 +127,7 @@ public class player_controller : MonoBehaviour {
 
             //give it velocity
             bulletInstance.AddForce(transform.up * bullet_speed * power.value, ForceMode2D.Impulse);
-            Debug.Log(power.value);
+            //Debug.Log(power.value);
             bulletInstance.transform.parent = transform;
             //Debug.Log(bulletInstance.velocity);
         }

@@ -104,13 +104,13 @@ public class ship_handler : MonoBehaviour {
         //Debug.Log("Enemy Turn");
         if (isTurn)
         {
-            Debug.Log("Ending enemy turn");
+            //Debug.Log("Ending enemy turn");
             isTurn = false;
             liveBullet = false;
         }
         else if (!isTurn)
         {
-            Debug.Log("Starting enemy turn");
+            //Debug.Log("Starting enemy turn");
             isTurn = true;
         }
     }
@@ -124,7 +124,7 @@ public class ship_handler : MonoBehaviour {
     {
         generateTrajectories();//generate some options
         evaluateAccuracyOfTrajectories();//evaluate them all
-        float best = 1000;
+        float best = 10000000;
         int ind = 0;
         for(int i=0;i<100;i++){//find the best one
             if (trajectoryOptions[i,2]<best){
@@ -135,7 +135,7 @@ public class ship_handler : MonoBehaviour {
                 ind = i;
             }
         }
-        Debug.Log("Went with shot: "+ind);
+        Debug.Log("Went with shot: "+ind+" which had fitness: "+trajectoryOptions[ind,2]);
         //angle = trajectoryOptions[0,0];//get angle
         //power = trajectoryOptions[0,1];//get power
         transform.rotation = Quaternion.Euler(0f, 0f, angle - 90);//rotate to match
@@ -156,6 +156,7 @@ public class ship_handler : MonoBehaviour {
                 trajectoryOptions[t,1]=0;
             }
             trajectoryOptions[t, 2] = 1000;//fitness
+            //Debug.Log("GTO: "+trajectoryOptions[t,0]+", "+trajectoryOptions[t,1]);
         }
     }
 
@@ -164,7 +165,7 @@ public class ship_handler : MonoBehaviour {
     //to the enemy ship without actually hitting it
     private void evaluateAccuracyOfTrajectories()
     {
-        float dt = Time.fixedDeltaTime;//Time
+        float dt = Time.fixedDeltaTime/Physics2D.velocityIterations;;//Time
         Vector2 velocity = new Vector2(0, 0);//velocity
         Vector2 position = new Vector2(0, 0);//position of particle
         Vector2 force = new Vector2(0, 0);//force vector
@@ -180,14 +181,17 @@ public class ship_handler : MonoBehaviour {
         //calculate fitnesses
         for(int i=0;i<100;i++)//iterate through every object
         {
-            startingRot = transform.rotation.z * Mathf.Deg2Rad;//get the z
+            startingRot = trajectoryOptions[i,0];//get the z
             position.x = transform.position.x;//set initial position
             position.y = transform.position.y;//set initial position
             velocity.x = bullet_speed * trajectoryOptions[i, 1] * Mathf.Sin(startingRot);//starting x velocity
             velocity.y = bullet_speed * trajectoryOptions[i, 1] * Mathf.Cos(startingRot);//starting y velocity
-            shortestDistance = 1000;//shortest distance for this trajectory
+            //Debug.Log("X: "+velocity.x+" Y: "+velocity.y);
+            //Debug.Log("Starting rotation: "+startingRot);
+            shortestDistance = 1000000;//shortest distance for this trajectory
+            hitPlanet = false;
 
-            for(int t=0;t<500;t++)//iterate through 100 time steps
+            for(int t=0;t<5000;t++)//iterate through 100 time steps
             {
                 //update force
                 for(int b=0; b<planets.Length;b++){//force is sum of planetary gravitational forces
@@ -209,30 +213,33 @@ public class ship_handler : MonoBehaviour {
                     planetPos = planet.transform.position;
                     if(Vector2.Distance(planetPos, position)<radius)//if the trajectory goes within the radius of the planet
                     {
-                        //Debug.Log("planet collision detected.");
+                        Debug.Log("planet collision detected.");
                         hitPlanet = true;
                         //break;
                     }
                 }
-                //If it hit a planet just stop calculating this trajectory
-                if(hitPlanet)
-                {
-                    trajectoryOptions[i,2]=1000;//set fitness to be really bad
-                    Debug.Log("Trajectory "+i+" hit a planet lol");
-                    break;
-                }
-
                 //if it didn't hit a planet, calculate distance from enemy
-                if(!hitPlanet)
+                if(hitPlanet == false)
                 {
-                    distance = Mathf.Abs(position.sqrMagnitude - enemy.transform.position.sqrMagnitude);//get distance from enemy
+                    distance = Mathf.Pow((enemy.transform.position.x - position.x), 2) + Mathf.Pow((enemy.transform.position.y - position.y), 2);//get distance from enemy
+                    //Debug.Log(distance);
                     if(distance<shortestDistance){
                         shortestDistance = distance;//if its shorter then replace shortest
                         trajectoryOptions[i,2]=shortestDistance;
+                        //Debug.Log("Better score updated");
                     }
                 }
+                //If it hit a planet just stop calculating this trajectory
+                if(hitPlanet == true)
+                {
+                    trajectoryOptions[i,2]=10000000;//set fitness to be really bad
+                    Debug.Log("Trajectory "+i+" hit a planet at time: "+t);
+                    break;
+                }
+
+
             }//time steps loop
-            Debug.Log("Trajectory "+i+" got "+shortestDistance+" away");
+            Debug.Log("Trajectory "+i+" fitness "+trajectoryOptions[i,2]);
         }//each ship loop
     }
 

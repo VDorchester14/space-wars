@@ -51,13 +51,13 @@ public class Driver : MonoBehaviour {
 
         if (index == ships.Length)//are we at the end of the array
         {
-            Debug.Log("Back to start of array");
+            //Debug.Log("Back to start of array");
             index = 0;//reset
         }
 
         //set active ship
         activeShip = ships[index];
-        Debug.Log("Currently " + activeShip.name + " turn");
+        //Debug.Log("Currently " + activeShip.name + " turn");
 
         //send it a message to do its turn
         //activeShip.SendMessage("turnPhase");
